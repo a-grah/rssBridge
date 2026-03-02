@@ -1,0 +1,124 @@
+{{define "title"}}Sites{{end}}
+
+{{define "content"}}
+<h1>Sites</h1>
+
+<div class="card">
+  <h2>Add New Site</h2>
+  <form method="POST" action="/admin/sites">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="form-group">
+        <label for="name">Site Name</label>
+        <input type="text" id="name" name="name" required placeholder="Hacker News">
+      </div>
+      <div class="form-group">
+        <label for="url">Homepage URL</label>
+        <input type="url" id="url" name="url" required placeholder="https://news.ycombinator.com">
+      </div>
+      <div class="form-group">
+        <label for="fetch_interval_hours">Fetch Interval (hours)</label>
+        <input type="number" id="fetch_interval_hours" name="fetch_interval_hours"
+               min="0.5" step="0.5" value="{{.DefaultInterval}}" placeholder="12">
+      </div>
+      <div class="form-group">
+        <label for="keywords_exclude">Exclude Keywords</label>
+        <input type="text" id="keywords_exclude" name="keywords_exclude"
+               placeholder="crypto, nft, sponsored">
+        <div class="hint">Comma-separated. Articles containing these words are skipped.</div>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Add Site &amp; Fetch</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Managed Sites</h2>
+  {{if .Sites}}
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>URL</th>
+        <th>Interval</th>
+        <th>Keywords</th>
+        <th>Status</th>
+        <th>Native RSS</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    {{range .Sites}}
+    <tr>
+      <td>{{.Name}}</td>
+      <td><a href="{{.URL}}" target="_blank">{{.URL}}</a></td>
+      <td>{{.FetchIntervalHours}}h</td>
+      <td>
+        {{if .KeywordsExclude}}
+          <span title="{{.KeywordsExclude}}">{{.KeywordsExclude}}</span>
+        {{else}}
+          <span style="color:var(--muted)">—</span>
+        {{end}}
+      </td>
+      <td>
+        {{if .Enabled}}
+          <span class="badge badge-success">enabled</span>
+        {{else}}
+          <span class="badge badge-muted">disabled</span>
+        {{end}}
+      </td>
+      <td>
+        {{if .NativeRSSURL}}
+          <a href="{{.NativeRSSURL}}" target="_blank" title="{{.NativeRSSURL}}">
+            <span class="badge badge-success">detected</span>
+          </a>
+        {{else}}
+          <span style="color:var(--muted)">none</span>
+        {{end}}
+      </td>
+      <td class="actions">
+        <a href="/admin/sites/{{.ID}}/edit" class="btn btn-ghost btn-sm">Edit</a>
+        <button class="btn btn-ghost btn-sm fetch-btn" data-id="{{.ID}}">Fetch</button>
+        <span class="fetch-result" id="fetch-result-{{.ID}}"></span>
+        <form class="inline" method="POST" action="/admin/sites/{{.ID}}/delete"
+              onsubmit="return confirm('Delete {{.Name}} and all its articles?')">
+          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="empty">No sites configured yet.</p>
+  {{end}}
+</div>
+
+<script>
+document.querySelectorAll('.fetch-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const id = btn.dataset.id;
+    const result = document.getElementById('fetch-result-' + id);
+    btn.disabled = true;
+    result.textContent = 'fetching…';
+    result.className = 'fetch-result visible';
+    try {
+      const resp = await fetch('/admin/sites/' + id + '/fetch', { method: 'POST' });
+      const json = await resp.json();
+      if (json.error) {
+        result.textContent = json.error;
+        result.className = 'fetch-result visible error';
+      } else {
+        result.textContent = '✓';
+        result.className = 'fetch-result visible';
+        setTimeout(() => result.className = 'fetch-result', 3000);
+      }
+    } catch(e) {
+      result.textContent = 'failed';
+      result.className = 'fetch-result visible error';
+    } finally {
+      btn.disabled = false;
+    }
+  });
+});
+</script>
+{{end}}

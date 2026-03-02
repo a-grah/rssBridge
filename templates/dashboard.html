@@ -1,0 +1,133 @@
+{{define "title"}}Dashboard{{end}}
+
+{{define "content"}}
+<h1>Dashboard</h1>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="value">{{.Stats.TotalSites}}</div>
+    <div class="label">Sites</div>
+  </div>
+  <div class="stat-card">
+    <div class="value">{{.Stats.TotalArticles}}</div>
+    <div class="label">Articles</div>
+  </div>
+  <div class="stat-card">
+    <div class="value">{{.Stats.TotalGroups}}</div>
+    <div class="label">Story Groups</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="section-header">
+    <h2>Sites</h2>
+    <a href="/admin/sites" class="btn btn-primary btn-sm">Manage Sites</a>
+  </div>
+  {{if .Sites}}
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>URL</th>
+        <th>Status</th>
+        <th>Last Fetched</th>
+        <th>Next Fetch</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    {{range .Sites}}
+    <tr>
+      <td>{{.Name}}</td>
+      <td>
+        <a href="{{.URL}}" target="_blank">{{.URL}}</a>
+        {{if .NativeRSSURL}}&nbsp;<a href="{{.NativeRSSURL}}" target="_blank" class="badge badge-success" title="{{.NativeRSSURL}}">RSS</a>{{end}}
+      </td>
+      <td>
+        {{if .Enabled}}
+          <span class="badge badge-success">enabled</span>
+        {{else}}
+          <span class="badge badge-muted">disabled</span>
+        {{end}}
+      </td>
+      <td>{{formatTime .LastFetchedAt}}</td>
+      <td>{{formatTime .NextFetchAt}}</td>
+      <td class="actions">
+        <button class="btn btn-ghost btn-sm fetch-btn" data-id="{{.ID}}">Fetch Now</button>
+        <span class="fetch-result" id="fetch-result-{{.ID}}"></span>
+      </td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="empty">No sites yet. <a href="/admin/sites">Add one →</a></p>
+  {{end}}
+</div>
+
+{{if .RecentLog}}
+<div class="card">
+  <div class="section-header">
+    <h2>Recent Fetches</h2>
+    <a href="/admin/log" class="btn btn-ghost btn-sm">View all →</a>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>Site</th>
+        <th>Found</th>
+        <th>Added</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+    {{range .RecentLog}}
+    <tr>
+      <td>{{formatTimePlain .FetchedAt}}</td>
+      <td>{{.SiteName}}</td>
+      <td>{{.ArticlesFound}}</td>
+      <td>{{.ArticlesAdded}}</td>
+      <td>
+        {{if .Error}}
+          <span class="badge badge-danger" title="{{.Error}}">error</span>
+        {{else}}
+          <span class="badge badge-success">ok</span>
+        {{end}}
+      </td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+</div>
+{{end}}
+
+<script>
+document.querySelectorAll('.fetch-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const id = btn.dataset.id;
+    const result = document.getElementById('fetch-result-' + id);
+    btn.disabled = true;
+    result.textContent = 'fetching…';
+    result.className = 'fetch-result visible';
+    try {
+      const resp = await fetch('/admin/sites/' + id + '/fetch', { method: 'POST' });
+      const json = await resp.json();
+      if (json.error) {
+        result.textContent = json.error;
+        result.className = 'fetch-result visible error';
+      } else {
+        result.textContent = 'triggered ✓';
+        result.className = 'fetch-result visible';
+        setTimeout(() => location.reload(), 1800);
+      }
+    } catch(e) {
+      result.textContent = 'request failed';
+      result.className = 'fetch-result visible error';
+    } finally {
+      btn.disabled = false;
+    }
+  });
+});
+</script>
+{{end}}

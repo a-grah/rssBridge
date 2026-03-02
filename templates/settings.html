@@ -1,0 +1,48 @@
+{{define "title"}}Settings{{end}}
+
+{{define "content"}}
+<h1>Settings</h1>
+
+<div class="card" style="max-width:540px;">
+  <form method="POST" action="/admin/settings">
+    <div class="form-group">
+      <label for="rss_title">RSS Feed Title</label>
+      <input type="text" id="rss_title" name="rss_title"
+             value="{{index .Settings "rss_title"}}" placeholder="rssBridge">
+    </div>
+    <div class="form-group">
+      <label for="rss_max_items">Max Items in RSS Feed</label>
+      <input type="number" id="rss_max_items" name="rss_max_items"
+             min="1" max="1000" value="{{index .Settings "rss_max_items"}}" placeholder="100">
+    </div>
+    <div class="form-group">
+      <label for="default_interval_hours">Default Fetch Interval (hours)</label>
+      <input type="number" id="default_interval_hours" name="default_interval_hours"
+             min="0.5" step="0.5" value="{{index .Settings "default_interval_hours"}}" placeholder="12">
+      <div class="hint">Used when adding a new site.</div>
+    </div>
+    <div class="form-group">
+      <label for="prune_after_days">Prune Articles After (days)</label>
+      <input type="number" id="prune_after_days" name="prune_after_days"
+             min="0" value="{{index .Settings "prune_after_days"}}" placeholder="30">
+      <div class="hint">Articles older than this are deleted. Set to 0 to disable.</div>
+    </div>
+    <button type="submit" class="btn btn-primary">Save Settings</button>
+  </form>
+</div>
+
+<div class="card" style="max-width:540px;">
+  <h2>Feed URL</h2>
+  <p style="color:var(--muted);margin-bottom:12px;">Subscribe to this URL in your RSS reader:</p>
+  <code style="
+    display:block;
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:12px;
+    font-family:var(--mono);
+    font-size:13px;
+    word-break:break-all;
+  ">http://localhost:{{index .Settings "port"}}/rss</code>
+</div>
+{{end}}

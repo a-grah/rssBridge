@@ -1,0 +1,41 @@
+{{define "title"}}Fetch Log{{end}}
+
+{{define "content"}}
+<h1>Fetch Log</h1>
+
+<div class="card">
+  {{if .Logs}}
+  <table>
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>Site</th>
+        <th>Found</th>
+        <th>Added</th>
+        <th>Status / Error</th>
+      </tr>
+    </thead>
+    <tbody>
+    {{range .Logs}}
+    <tr>
+      <td style="white-space:nowrap;">{{formatTimePlain .FetchedAt}}</td>
+      <td>{{.SiteName}}</td>
+      <td>{{.ArticlesFound}}</td>
+      <td>{{.ArticlesAdded}}</td>
+      <td>
+        {{if .Error}}
+          <span class="badge badge-danger">error</span>
+          <span style="color:var(--danger);font-size:12px;margin-left:6px;">{{.Error}}</span>
+        {{else}}
+          <span class="badge badge-success">ok</span>
+        {{end}}
+      </td>
+    </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <p class="empty">No fetch history yet. Add a site to get started.</p>
+  {{end}}
+</div>
+{{end}}
