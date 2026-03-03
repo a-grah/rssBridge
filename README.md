@@ -77,53 +77,6 @@ Subscribe to `http://localhost:7171/rss` in your RSS reader.
 
 If a monitored site has its own native RSS feed, rssBridge detects it and shows an advisory item in the feed with a direct link so you can subscribe to the source instead.
 
-## Deploying to a Raspberry Pi
-
-Cross-compiles to `linux/arm64` with no CGO or system dependencies required.
-
-**One-time Pi setup:**
-```bash
-ssh pi@rp4.lan "bash -s" < deploy/setup-pi.sh
-```
-
-**Build and deploy:**
-```bash
-make deploy PI_HOST=pi@rp4.lan
-```
-
-**Install the systemd service (once):**
-```bash
-make install-service PI_HOST=pi@rp4.lan
-```
-
-`PI_HOST` defaults to `pi@raspberrypi.local` if not specified.
-
-The binary and templates are deployed to `/opt/rssbridge/` and the database lives at `/var/lib/rssbridge/rssbridge.db`, persisting across redeploys. The service runs as a locked-down `rssbridge` system user and is enabled to start on boot.
-
-**Manage the service:**
-```bash
-sudo systemctl status rssbridge
-sudo journalctl -u rssbridge -f
-```
-
-## Project Structure
-
-```
-main.go                      entry point
-internal/
-  store/store.go             SQLite schema and all DB access
-  scraper/scraper.go         homepage fetch and article extraction
-  grouper/grouper.go         Jaccard similarity story grouping
-  feed/feed.go               RSS 2.0 XML generation
-  scheduler/scheduler.go     background fetch scheduler
-  admin/admin.go             HTTP handlers
-templates/                   server-rendered HTML (html/template)
-Makefile                     build and deploy targets
-deploy/
-  setup-pi.sh                one-time Pi preparation script
-  rssbridge.service          systemd unit file
-```
-
 ## Dependencies
 
 - [`modernc.org/sqlite`](https://pkg.go.dev/modernc.org/sqlite) — pure-Go SQLite driver, no CGO
