@@ -24,7 +24,7 @@ No CGO. No system libraries. No external services.
 ## Install
 
 ```bash
-git clone https://github.com/yourname/rssBridge
+git clone https://github.com/a-grah/rssBridge
 cd rssBridge
 go build -o rssBridge .
 ./rssBridge
