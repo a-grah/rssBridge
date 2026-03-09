@@ -54,6 +54,8 @@ func main() {
 
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
+	staticDir := filepath.Join(filepath.Dir(templateDir), "static")
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir))))
 
 	addr := ":" + port
 	fmt.Printf("rssBridge listening on http://localhost%s/admin\n", addr)
