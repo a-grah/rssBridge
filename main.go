@@ -14,6 +14,8 @@ import (
 	"rssbridge/internal/store"
 )
 
+var version = "dev"
+
 func main() {
 	portFlag := flag.String("port", "", "HTTP port (overrides DB setting and RSSBRIDGE_PORT env var)")
 	dbPath := flag.String("db", "rssbridge.db", "Path to SQLite database file")
@@ -47,7 +49,7 @@ func main() {
 
 	// Build admin handler
 	templateDir := templateDirectory()
-	h, err := admin.New(st, sc, templateDir)
+	h, err := admin.New(st, sc, templateDir, version)
 	if err != nil {
 		log.Fatalf("admin init: %v", err)
 	}

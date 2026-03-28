@@ -26,10 +26,11 @@ type Handler struct {
 	sc          Scheduler
 	templateDir string
 	funcMap     template.FuncMap
+	version     string
 }
 
 // New creates an admin Handler.
-func New(st *store.Store, sc Scheduler, templateDir string) (*Handler, error) {
+func New(st *store.Store, sc Scheduler, templateDir string, version string) (*Handler, error) {
 	funcMap := template.FuncMap{
 		"formatTime": func(t *time.Time) string {
 			if t == nil {
@@ -57,7 +58,7 @@ func New(st *store.Store, sc Scheduler, templateDir string) (*Handler, error) {
 	if _, err := template.New("").Funcs(funcMap).ParseGlob(pattern); err != nil {
 		return nil, fmt.Errorf("parse templates: %w", err)
 	}
-	return &Handler{st: st, sc: sc, templateDir: templateDir, funcMap: funcMap}, nil
+	return &Handler{st: st, sc: sc, templateDir: templateDir, funcMap: funcMap, version: version}, nil
 }
 
 // RegisterRoutes registers all admin and RSS routes on mux.
@@ -303,7 +304,7 @@ func (h *Handler) handleSettings(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		h.render(w, "settings.html", map[string]any{"Settings": settings})
+		h.render(w, "settings.html", map[string]any{"Settings": settings, "Version": h.version})
 	case http.MethodPost:
 		h.handleSaveSettings(w, r)
 	default:

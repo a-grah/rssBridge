@@ -1,14 +1,15 @@
 PI_HOST  ?= pi@raspberrypi.local
 DEPLOY_DIR = /opt/rssbridge
 BINARY   = rssBridge
+VERSION  ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 
 .PHONY: build build-pi deploy
 
 build:
-	go build -o $(BINARY) .
+	go build -ldflags "-X main.version=$(VERSION)" -o $(BINARY) .
 
 build-pi:
-	GOOS=linux GOARCH=arm64 go build -o $(BINARY)-linux-arm64 .
+	GOOS=linux GOARCH=arm64 go build -ldflags "-X main.version=$(VERSION)" -o $(BINARY)-linux-arm64 .
 
 deploy: build-pi
 	ssh $(PI_HOST) "sudo mkdir -p $(DEPLOY_DIR)"
