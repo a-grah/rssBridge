@@ -24,10 +24,11 @@ jobs:
           VERSION=${GITHUB_REF_NAME}
           LDFLAGS="-X main.version=${VERSION}"
 
-          GOOS=linux  GOARCH=arm64  go build -ldflags "${LDFLAGS}" -o rssBridge-linux-arm64   .
-          GOOS=linux  GOARCH=amd64  go build -ldflags "${LDFLAGS}" -o rssBridge-linux-amd64   .
-          GOOS=darwin GOARCH=arm64  go build -ldflags "${LDFLAGS}" -o rssBridge-darwin-arm64  .
-          GOOS=darwin GOARCH=amd64  go build -ldflags "${LDFLAGS}" -o rssBridge-darwin-amd64  .
+          GOOS=linux   GOARCH=arm64  go build -ldflags "${LDFLAGS}" -o rssBridge-linux-arm64       .
+          GOOS=linux   GOARCH=amd64  go build -ldflags "${LDFLAGS}" -o rssBridge-linux-amd64       .
+          GOOS=darwin  GOARCH=arm64  go build -ldflags "${LDFLAGS}" -o rssBridge-darwin-arm64      .
+          GOOS=darwin  GOARCH=amd64  go build -ldflags "${LDFLAGS}" -o rssBridge-darwin-amd64      .
+          GOOS=windows GOARCH=amd64  go build -ldflags "${LDFLAGS}" -o rssBridge-windows-amd64.exe .
 
       - name: Create release
         uses: softprops/action-gh-release@v2
@@ -37,3 +38,4 @@ jobs:
             rssBridge-linux-amd64
             rssBridge-darwin-arm64
             rssBridge-darwin-amd64
+            rssBridge-windows-amd64.exe
