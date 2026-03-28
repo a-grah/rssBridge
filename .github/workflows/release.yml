@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build and release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build binaries
+        run: |
+          VERSION=${GITHUB_REF_NAME}
+          LDFLAGS="-X main.version=${VERSION}"
+
+          GOOS=linux  GOARCH=arm64  go build -ldflags "${LDFLAGS}" -o rssBridge-linux-arm64   .
+          GOOS=linux  GOARCH=amd64  go build -ldflags "${LDFLAGS}" -o rssBridge-linux-amd64   .
+          GOOS=darwin GOARCH=arm64  go build -ldflags "${LDFLAGS}" -o rssBridge-darwin-arm64  .
+          GOOS=darwin GOARCH=amd64  go build -ldflags "${LDFLAGS}" -o rssBridge-darwin-amd64  .
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            rssBridge-linux-arm64
+            rssBridge-linux-amd64
+            rssBridge-darwin-arm64
+            rssBridge-darwin-amd64
